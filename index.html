@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/1.6.4/fullcalendar.print.css" type="text/css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- <link href="/open-iconic/font/css/open-iconic-bootstrap.css" rel="stylesheet"> -->
+    <title>Where is it Winter?</title>
+</head>
+
+<body>
+    <!--<nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Where is it Winter?</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-item nav-link" href="index.html">Home </a>
+                
+                <a class="nav-item nav-link active" href="#">Where is it winter?<span class="sr-only">(current)</span></a>
+                <a class="nav-item nav-link" href="summer.html">Where is it summer?</a>
+            </div>
+        </div>
+    </nav>-->
+
+    <div class="jumbotron jumbotron-fluid" id="jumbotron">
+        <div class="container headDisplay">
+            <div class="row" id="jumbotron-1">
+                <div class="col-sm" id="main">
+                    <h1 class="display-4">Where is it winter?</h1>
+                    <div class="col-sm">
+                        <p>Yearning for a winter wonderland? </p>
+                        <p>If the cold eludes you where you are, find a place to
+                            visit for a quick escape from the heat!</p>
+                        <div class="userTemp"></div>
+                        <!--<p>Hate the cold? Check out the <a href="escaping-winter.html">Escape Winter</a> page.</p>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Find a location!</h4>
+        </div>
+        <div class="card-body">
+            <div class="selectDate">
+                <p> The locations listed below are major U.S. cities where the average high temperature in January is above
+                    60 degrees Fahrenheit. Each city listed is situated close to a major airport.</p>
+                <p> Select a future date up to 5 days from now, and current temperatures will populate for major U.S. cities where the average high temperature in January is below 50 degrees Fahrenheit. </p>
+                <p>Once you've selected a destination from the list, you
+                    will be redirected in a new tab to Expedia for flight/hotel options.</p>
+                <div class="dateOptions">
+
+                </div>
+                <button class="submit">Submit</button>
+            </div>
+            <h5 class="load">Please wait a moment for results to load below.</h5>
+
+            <table class="table"></table>
+            <!-- <button class="test">Test</button>-->
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+    <script language="javascript" src="https://momentjs.com/downloads/moment.js"></script>
+
+
+    <script language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.43/js/bootstrap-datetimepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.43/css/bootstrap-datetimepicker.min.css">
+
+    <!-- our javascript 
+    <script src="assets/javascript/app.js" async defer></script>-->
+    <script>
+        $(document).ready(function () {
+            //Add city options to the DOM
+            $('.dateOptions').append(`<select class='citySelector' name='ChooseCity'>
+                <option value='5461313&ftla=AUS'>Austin, TX</option>
+                <option value='6139111&ftla=HOU'>Houston, TX</option>
+                <option value='5783882&ftla=JAX'>Jacksonville, FL</option>
+                <option value='5783884&ftla=LAX'>Los Angeles, CA</option>
+                <option value='4278605&ftla=MIA'>Miami, FL</option>
+                <option value='5854029&ftla=MSY'>New Orleans, LA</option>
+                <option value='5194573&ftla=MCO'>Orlando, FL</option>
+                <option value='5785680&ftla=PHX'>Phoenix, AZ</option>
+                <option value='5521747&ftla=SAT'>San Antonio, TX</option>
+                <option value='5128531&ftla=SAN'>San Diego, CA</option>
+                <option value='4280404&ftla=TPA'>Tampa, FL</option>
+                </select>`)
+            var time = moment().format("LL");
+            const tomorrow = moment().add(1, 'day').endOf('day');
+            const twoDays = moment().add(2, 'day').endOf('day');
+            const threeDays = moment().add(3, 'day').endOf('day');
+            const fourDays = moment().add(4, 'day').endOf('day');
+            const fiveDays = moment().add(5, 'day').endOf('day');
+            //Format dates ex. December 3, 2018
+            let tomorrowsDate = tomorrow.format('LL');
+            let twoDaysDate = twoDays.format("LL");
+            let threeDaysDate = threeDays.format("LL");
+            let fourDaysDate = fourDays.format("LL");
+            let fiveDaysDate = fiveDays.format("LL");
+            //Assign values to each date option in the dropdown:
+            let timeFormatted = moment().format("YYYY-MM-DD");
+            let tomorrowFormatted = tomorrow.format('YYYY-MM-DD');
+            let twoDaysFormatted = twoDays.format("YYYY-MM-DD");
+            let threeDaysFormatted = threeDays.format("YYYY-MM-DD");
+            let fourDaysFormatted = fourDays.format("YYYY-MM-DD");
+            let fiveDaysFormatted = fiveDays.format("YYYY-MM-DD");
+            //Add date options to the DOM
+            $('.dateOptions').append(`<select class='dateSelector' name='ChooseDate'>
+                <option value='${tomorrowFormatted}'>${tomorrowsDate}</option>
+                <option value='${twoDaysFormatted}'>${twoDaysDate}</option>
+                <option value='${threeDaysFormatted}'>${threeDaysDate}</option>
+                <option value='${fourDaysFormatted}'>${fourDaysDate}</option>
+                <option value='${fiveDaysFormatted}'>${fiveDaysDate}</option>
+                </select>`)
+            const getCurrent = (cityName) => {
+                return "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + ",us&appid=a71c1279b0c0863b3483fab6234795b2";
+            }
+            let theCurrentTemp;
+            //Write function to manipulate this based on city name
+            function getTheTemperature(theCurrentTemp) {
+                //getDataTemp = function (currentCallback) {
+                for (let n = 0; n < airportsArray.length; n++) {
+                    $.ajax({
+                        url: "https://api.openweathermap.org/data/2.5/weather?q=" + airportsArray[n].location + ",us&appid=a71c1279b0c0863b3483fab6234795b2",
+                        success: function (data) {
+                            console.log('Current Temp', data);
+                            theCurrentTemp = data.main.temp
+                            //console.log('the temp?', thisTemp)
+                            //dataTemp = thisTemp;
+                            currentCallback(theCurrentTemp)
+                        }
+                    });
+                }//}
+            }
+            getTheTemperature = function (idk) {
+                console.log(`idk ${idk}`)
+            }
+            const getUserTemp = (userLocation) => {
+                return "https://api.openweathermap.org/data/2.5/forecast?q=" + location + ",us&appid=a71c1279b0c0863b3483fab6234795b2"
+            }
+            const getForecast = (location) => {
+                return "https://api.openweathermap.org/data/2.5/forecast?q=" + location + ",us&appid=a71c1279b0c0863b3483fab6234795b2";
+            }
+            //console.log(getForecast("denver"));
+            let arrTest = [
+                {
+                    city: "Denver",
+                    forecast: getForecast("denver")
+                }
+            ]
+            console.log(arrTest)
+            //Comment out if testing outside the API
+            var airports = [];
+            let airportsArray = [
+                {
+                    location: "Anchorage",
+                    state: "AK",
+                    name: "Ted Stevens Anchorage International Airport",
+                    code: "ANC",
+                    destCode: "Anchorage+(and+vicinity),+Alaska,+United+States+Of+America&destinationId=178230&ttla=ANC",
+                    avgHighJan: 23,
+                    currentTemp: getTheTemperature("Anchorage")
+                },
+                {
+                    location: "Boston",
+                    state: "MA",
+                    name: "Logan International Airport",
+                    code: "BOS",
+                    destCode: "Boston+(and+vicinity),+Massachusetts,+United+States+of+America&destinationId=178239&ttla=BOS",
+                    avgHighJan: 36,
+                    currentTemp: getTheTemperature("Boston")
+                },
+                {
+                    location: "Chicago",
+                    state: "IL",
+                    name: "Chicago Midway International Airport",
+                    code: "MDW",
+                    destCode: "Chicago,+IL,+United+States+(MDW-Midway+Intl.)&destinationId=5719117&ttla=MDW",
+                    avgHighJan: 31,
+                    currentTemp: getTheTemperature("Chicago")
+                },
+                {
+                    location: "Chicago",
+                    state: "IL",
+                    name: "Chicago O'Hare International",
+                    code: "ORD",
+                    destCode: "Chicago,+IL,+United+States+(ORD-O%27Hare+Intl.)&destinationId=4477519&ttla=ORD&",
+                    avgHighJan: 31,
+                    currentTemp: getTheTemperature("Chicago")
+                },
+                {
+                    location: "Cleveland",
+                    state: "OH",
+                    name: "Cleveland Hopkins International",
+                    code: "CLE",
+                    destCode: "Cleveland+(and+vicinity),+Ohio,+United+States+of+America&destinationId=178250&ttla=CLE",
+                    avgHighJan: 34,
+                    currentTemp: getTheTemperature("Cleveland")
+                },
+                {
+                    location: "Denver",
+                    state: "CO",
+                    name: "Denver International Airport",
+                    code: "DEN",
+                    destCode: "Denver+(and+vicinity),+Colorado,+United+States+of+America&destinationId=178254&ttla=DEN",
+                    avgHighJan: 45,
+                    currentTemp: getTheTemperature("Denver")
+                },
+                {
+                    location: "Detroit",
+                    state: "MI",
+                    name: "Detroit Metropolitan Airport",
+                    code: "DTW",
+                    destCode: "Detroit+(and+vicinity),+Michigan,+United+States+of+America&destinationId=178255&ttla=DTT",
+                    avgHighJan: 32,
+                    currentTemp: getTheTemperature("Detroit")
+                },
+                {
+                    location: "Indianapolis",
+                    state: "IN",
+                    name: "Indianapolis International Airport",
+                    code: "IND",
+                    destCode: "Indianapolis,+IN,+United+States+(IND-Indianapolis+Intl.)&destinationId=4476489&ttla=IND",
+                    avgHighJan: 36,
+                    currentTemp: getTheTemperature("Indianapolis")
+                },
+                {
+                    location: "Kansas City",
+                    state: "MO",
+                    name: "Kansas City International Airport",
+                    code: "MCI",
+                    destCode: "Kansas+City+(and+vicinity),+Missouri,+United+States+of+America&destinationId=178273&ttla=MCI",
+                    avgHighJan: 40,
+                    currentTemp: getTheTemperature("Kansas City")
+                },
+                {
+                    location: "Louisville",
+                    state: "KY",
+                    name: "Louisville International Airport",
+                    code: "SDF",
+                    destCode: "Louisville+(and+vicinity),+Kentucky,+United+States+of+America&destinationId=603002&ttla=SDF",
+                    avgHighJan: 43,
+                    currentTemp: getTheTemperature("Louisville")
+                },
+                {
+                    location: "Milwaukee",
+                    state: "WI",
+                    name: "General Mitchell International Airport",
+                    code: "MKE",
+                    destCode: "Milwaukee+(and+vicinity),+Wisconsin,+United+States+of+America&destinationId=602647&ttla=MKE",
+                    avgHighJan: 29,
+                    currentTemp: getTheTemperature("Milwaukee")
+                },
+                {
+                    location: "Minneapolis",
+                    state: "MN",
+                    name: "Minneapolis–Saint Paul International Airport",
+                    code: "MSP",
+                    destCode: "Minneapolis+-+St.+Paul+(and+vicinity),+Minnesota,+United+States+of+America&destinationId=178287&ttla=MSP",
+                    avgHighJan: 24,
+                    currentTemp: getTheTemperature("Minneapolis")
+                },
+                {
+                    location: "Nashville",
+                    state: "TN",
+                    name: "Nashville International Airport",
+                    code: "BNA",
+                    destCode: "Nashville+(and+vicinity),+Tennessee,+United+States+of+America&destinationId=178291&ttla=BNA",
+                    avgHighJan: 47,
+                    currentTemp: getTheTemperature("Nashville")
+                },
+                {
+                    location: "New York",
+                    state: "NY",
+                    name: "John F. Kennedy International Airport",
+                    code: "JFK",
+                    destCode: "New+York,+NY,+United+States+(JFK-John+F.+Kennedy+Intl.)&destinationId=4933194&ttla=JFK",
+                    avgHighJan: 38,
+                    currentTemp: getTheTemperature("New York City")
+                },
+                {
+                    location: "New York",
+                    state: "NY",
+                    name: "LaGuardia Airport",
+                    code: "LGA",
+                    destCode: "New+York,+NY,+United+States+(LGA-LaGuardia)&destinationId=4278092&ttla=LGA",
+                    avgHighJan: 38,
+                    currentTemp: getTheTemperature("New York City")
+                },
+                {
+                    location: "Philadelphia",
+                    state: "PA",
+                    name: "Philadelphia International Airport",
+                    code: "PHL",
+                    destCode: "Philadelphia+(and+vicinity),+Pennsylvania,+United+States+of+America&destinationId=178297&ttla=PHL",
+                    avgHighJan: 40,
+                    currentTemp: getTheTemperature("Philadelphia")
+                },
+                {
+                    location: "Portland",
+                    state: "OR",
+                    name: "Portland International Airport",
+                    code: "PDX",
+                    destCode: "Portland+(and+vicinity),+Oregon,+United+States+of+America&destinationId=178299&ttla=PDX",
+                    avgHighJan: 47,
+                    currentTemp: getTheTemperature("Portland")
+                },
+                {
+                    location: "Salt Lake City",
+                    state: "UT",
+                    name: "Salt Lake City International Airport",
+                    code: "SLC",
+                    destCode: "Salt+Lake+City+(and+vicinity),+Utah,+United+States+of+America&destinationId=178302&ttla=SLC",
+                    avgHighJan: 37,
+                    currentTemp: getTheTemperature("Salt Lake City")
+                },
+                {
+                    location: "Seattle",
+                    state: "WA",
+                    name: "Seattle–Tacoma International Airport",
+                    code: "SEA",
+                    destCode: "Seattle+(and+vicinity),+Washington,+United+States+of+America&destinationId=178307&ttla=SEA",
+                    avgHighJan: 49,
+                    currentTemp: getTheTemperature("Seattle")
+                },
+                {
+                    location: "St. Louis",
+                    state: "MO",
+                    name: "St. Louis Lambert International Airport",
+                    code: "STL",
+                    destCode: "St.+Louis+(and+vicinity),+United+States+of+America&destinationId=178309&ttla=STL",
+                    avgHighJan: 40,
+                    currentTemp: getTheTemperature("St Louis")
+                },
+                {
+                    location: "Washington",
+                    state: "DC",
+                    name: "Ronald Reagan Washington National Airport",
+                    code: "DCA",
+                    destCode: "Washington+(and+vicinity),+United+States+of+America&destinationId=178318&ttla=WAS",
+                    avgHighJan: 43,
+                    currentTemp: getTheTemperature("Washington DC")
+                }
+            ]
+            //For future development using Leaflet
+            /*var map = L.map('map', {
+                center: [51.505, -0.09],
+                zoom: 13
+            });*/
+            //console.log(map);
+            //$("#leafletmap").append(map);
+            //console.log('Airports Array Original:',airportsArray)
+            $('.submit').on('click', function (event) {
+                event.preventDefault();
+                //Clear array each time Submit is clicked so the table doesn't load multiple times on the page
+                function clearArray() {
+                    return airports = []
+                }
+                clearArray()
+                //Get user inputs & create variables to build links for each individual "Visit Expedia" button
+                let userOrigin = $('.citySelector').val();
+                let selection = $('.dateSelector').val();
+                let dateChosen = moment(selection);
+                console.log("DATE:", dateChosen)
+                let userDeparture = moment(selection).format('l');
+                let userReturn = moment(selection).add(3, 'day').format('l');
+                console.log("Date Chosen: ", selection);
+                let linkStarter = "https://www.expedia.com/Hotel-Search?packageType=fh&searchProduct=hotel&c=a5db4630-d291-467d-af37-5290167d2f15&adults=2&originId=";
+                let linkEnd = "&sort=recommended&tripType=ROUND_TRIP";
+                let inputCity;
+                let usersTemperature;
+                let userCity = userOrigin;
+                switch (userCity) {
+                    case '5461313&ftla=AUS':
+                        inputCity = "Austin"
+                        break;
+                    case '6139111&ftla=HOU':
+                        inputCity = "Houston"
+                        break;
+                    case '5783884&ftla=LAX':
+                        inputCity = "Los Angeles"
+                        break;
+                    case '5783882&ftla=JAX':
+                        inputCity = "Jacksonville"
+                        break;
+                    case '4278605&ftla=MIA':
+                        inputCity = "Miami"
+                        break;
+                    case '5854029&ftla=MSY':
+                        inputCity = "New Orleans"
+                        break;
+                    case '5194573&ftla=MCO':
+                        inputCity = "Orlando"
+                        break;
+                    case '5785680&ftla=PHX':
+                        inputCity = "Phoenix"
+                        break;
+                    case '5521747&ftla=SAT':
+                        inputCity = "San Antonio"
+                        break;
+                    case '5128531&ftla=SAN':
+                        inputCity = "San Diego"
+                        break;
+                    case '4280404&ftla=TPA':
+                        inputCity = "Tampa"
+                        break;
+                    default:
+                        console.log('Sorry, ' + inputCity + 'is not valid.');
+                }
+                //Displays current temperature in user's area.
+                $.ajax({
+                    url: "https://api.openweathermap.org/data/2.5/weather?q=" + inputCity + ",us&appid=a71c1279b0c0863b3483fab6234795b2",
+                    success: function (data) {
+                        console.log("User's current temperature: ", Math.floor(((parseInt(data.main.temp) - 273) * 9 / 5) + 32));
+                        let userTemperature = Math.floor(((parseInt(data.main.temp) - 273) * 9 / 5) + 32);
+                        $('.userTemp').html(`<h4>It is currently ${userTemperature} in ${inputCity}.`);
+                                usersTemperature = userTemperature;
+                                console.log('usersTemperature',usersTemperature)
+                        getUserTemperature = function (usersTemp) {
+                            
+                            usersTemp(usersTemperature)
+                        }
+                    },
+                });
+                /*getUserTemperature(function (homeTemp) {
+                    console.log('User TEMP?', homeTemp)
+                })*/
+                console.log('usersTemperature',usersTemperature)
+                //Find appropriate details & sort results by coldest first (lowest forecasted high in Fahrenheit)
+                var runRequests = function (tempIndex) {
+                    if (airportsArray.length == tempIndex) {
+                        console.log("runRequests Success: AIRPORTS", airports);
+                        airports.sort(function (a, b) {
+                            return parseFloat(a.tempContainer) - parseFloat(b.tempContainer);
+                            console.log('Sorted Airports? ', airports);
+                        });
+                        //let tempDiff = p.tempContainer - usersTemperature
+                        let rowItems = airports.map(function (p) {
+                            return `<tr><td>${p.location}, ${p.state}</td>
+                                <td>${p.tempContainer}</td>
+                                <td>${p.tempContainer - usersTemperature}</td>
+                                <td>${p.conditions}</td>
+                                <td><button><a href="${linkStarter}${userOrigin}&destination=${p.destCode}&startDate=${userDeparture}&endDate=${userReturn}${linkEnd}"target="_blank">Visit Expedia</a></button></td></tr>`;
+                        });
+                        let tableHead = '<tr><th>Location</th><th>Current Temperature</th><th>Temperature Difference from '+inputCity+'</th><th>Conditions</th><th>Expedia Link</th></tr>';
+                        let createTable = '<table> ' + tableHead + rowItems.join('') + ' </table>';
+                        $(".table").html(createTable);
+                        return;
+                    }
+                    var oneAirport = airportsArray[tempIndex];
+                    //Current Temperature Data to get later
+                    $.ajax({
+                        url: "https://api.openweathermap.org/data/2.5/weather?q=" + oneAirport.location + ",us&appid=a71c1279b0c0863b3483fab6234795b2",
+                        success: function (data) {
+                            console.log('Current', data, oneAirport.location)
+                        },
+                    });
+                    //AJAX call to Open Weather Map API for our weather data
+                    $.ajax({
+                        url: "https://api.openweathermap.org/data/2.5/weather?q=" + oneAirport.location + ",us&appid=a71c1279b0c0863b3483fab6234795b2",
+                        success: function (data) {
+                            let temperatureContainer = [];
+                            temperatureContainer.push(data);
+                            console.log("Temp. container: ", temperatureContainer);
+                            //Return the result for the forecasted temperature at 3 PM on the date selected by the user
+                            for (let j = 0; j < temperatureContainer.length; j++) {
+                                console.log("TEMP CONT J", temperatureContainer[j].main.temp)
+                                $.each(temperatureContainer[j], function (key, value) {
+                                    //console.log('temp?? ' + value.dt_txt);
+                                    var result = temperatureContainer[j].main.temp;
+                                    var weatherCon = temperatureContainer[j].weather[0].main
+                                    //console.log('Current Temp:', data[j].main.temp);
+                                    getResults = function (callback) {
+                                        console.log('getting callback...')
+                                        callback(result);
+                                    }
+                                    getCond = function (condCall) {
+                                        console.log('getting callback...')
+                                        condCall(weatherCon);
+                                    }
+                                })
+                            }
+                            getResults(function (value) {
+                                console.log("Get Value?", value, oneAirport.location);
+                                let theTemp = Math.floor(((parseInt(value) - 273) * 9 / 5) + 32);
+                                console.log('theTemp', theTemp);
+                                getCond(function (weathers) {
+                                    console.log('Conditions?', weathers);
+                                    airports.push({
+                                        location: oneAirport.location,
+                                        name: oneAirport.name,
+                                        code: oneAirport.code,
+                                        destCode: oneAirport.destCode,
+                                        state: oneAirport.state,
+                                        //currentTemp: thisTemperature,
+                                        //tempDiff: theTemp - parseInt(userTemperature),
+                                        tempContainer: theTemp,
+                                        //low: theLow,
+                                        conditions: weathers
+                                    });
+                                })
+                            })
+                        },
+                        error: function () {
+                            airports.push({});
+                            console.error("runRequests Error", "user", arguments);
+                        },
+                        complete: function () {
+                            runRequests(++tempIndex);
+                        }
+                    });
+                };
+                runRequests(0);
+            })
+        }) //END OF SCRIPT
+        /*================================
+            NOTES
+            Some cities, specifically Denver and SLC, appear to be off in the forecast. Maybe refactor this to show current temps
+            - add calendar so user can choose start/end dates for travel.
+            //https://aviation-edge.com/nearby-airport-and-city-api/ (find airports by lat/lon cross-referenced with Here or TomTom API?)
+            //after this, create a URL for each airport showing the search for depart/return with origin to complete search string
+            //comment out during some testing to prevent addtl api calls?
+            //alt. api key: 58385510bb5cc7f607f9d7c9f4b6e6af
+            //locations that someone can travel to over a weekend with a major airport nearby, avg. jan. temp under 50
+            //source: https://www.currentresults.com/Weather/US/average-city-temperatures-in-january.php
+            FUTURE
+            //deploy to Heroku
+            //move airport data to database
+        ================================*/
+    </script>
+</body>
+
+</html>
